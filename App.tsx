@@ -20,7 +20,7 @@ const App: React.FC = () => {
   const [otherCharges, setOtherCharges] = useState<number>(0);
   const [discountPercentage, setDiscountPercentage] = useState<number>(0);
 
-  const [selectedCategory, setSelectedCategory] = useState<string | null>("All");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null); // Changed initial state from "All" to null
   const [currentView, setCurrentView] = useState<'selection' | 'bill'>('selection');
   const [selectionStep, setSelectionStep] = useState<'customerInfo' | 'sareeSelection'>('customerInfo');
   const [appMessage, setAppMessage] = useState<{ type: 'success' | 'error' | 'info', message: string } | null>(null);
@@ -31,29 +31,30 @@ const App: React.FC = () => {
   const [fileError, setFileError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
 
+  const [categoryInteractionMade, setCategoryInteractionMade] = useState<boolean>(false);
+
 
   const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) {
       setSareesToDisplay(DEFAULT_SAREE_DATA_LIST);
       setCurrentSareeCategories(DEFAULT_SAREE_CATEGORIES);
-      setSelectedCategory("All");
+      setSelectedCategory(null); // Changed from "All"
       setFileError("No file selected. Please select an Excel file to load data.");
       setFileName(null);
       setAppMessage({type: 'info', message: 'File selection cancelled or no file chosen.'});
+      setCategoryInteractionMade(false);
       return;
     }
 
     setFileName(file.name);
     setIsLoadingData(true);
     setFileError(null);
-    setAppMessage(null); // Clear previous app messages
+    setAppMessage(null); 
+    setCategoryInteractionMade(false);
 
-    // Reset cart and related states for a new data load
     setSelectedSarees(new Map());
-    // Optionally reset customer details, bill number, rates if desired when a new file is loaded
-    // For now, let's keep them as they might be pre-filled for the next bill with new data.
-
+    
     const reader = new FileReader();
     reader.onload = async (e) => {
       try {
@@ -113,18 +114,20 @@ const App: React.FC = () => {
         setSareesToDisplay(parsedSarees);
         const uniqueCategories = Array.from(new Set(parsedSarees.map(s => s.category)));
         setCurrentSareeCategories(["All", ...uniqueCategories.sort()]);
-        setSelectedCategory("All"); // Default to "All" category selected
+        setSelectedCategory(null); // Changed from "All"
+        setCategoryInteractionMade(false); // Reset interaction flag
         setAppScreen('main');
-        setCurrentView('selection'); // Start at selection screen
-        setSelectionStep('customerInfo'); // Start at customer info step within selection
-        setAppMessage({ type: 'success', message: `${parsedSarees.length} sarees loaded successfully from ${file.name}!` });
-        setFileError(null); // Clear any previous file error on success
+        setCurrentView('selection'); 
+        setSelectionStep('customerInfo'); 
+        setFileError(null); 
       } catch (error: any) {
         console.error("Error processing Excel file:", error);
         const userFriendlyMessage = error.message || 'Could not process the Excel file. Please ensure it is a valid .xlsx or .xls file and in the correct format.';
         setFileError(userFriendlyMessage);
-        setSareesToDisplay(DEFAULT_SAREE_DATA_LIST); // Reset to empty
-        setCurrentSareeCategories(DEFAULT_SAREE_CATEGORIES); // Reset to ["All"]
+        setSareesToDisplay(DEFAULT_SAREE_DATA_LIST); 
+        setCurrentSareeCategories(DEFAULT_SAREE_CATEGORIES); 
+        setSelectedCategory(null); // Changed from "All"
+        setCategoryInteractionMade(false); // Reset interaction flag on error
         setAppMessage({ type: 'error', message: `Failed to load data: ${userFriendlyMessage}` });
       } finally {
         setIsLoadingData(false);
@@ -135,6 +138,7 @@ const App: React.FC = () => {
       const errorMessage = "Failed to read the file. It might be corrupted or inaccessible.";
       setFileError(errorMessage);
       setAppMessage({ type: 'error', message: errorMessage });
+      setCategoryInteractionMade(false); // Reset interaction flag on read error
     };
     reader.readAsArrayBuffer(file);
   };
@@ -376,14 +380,12 @@ const App: React.FC = () => {
 
   const handleSwitchToUploadScreen = () => {
     setAppScreen('upload');
-    // Clear potentially sensitive or session-specific data when going back to upload
     setSareesToDisplay(DEFAULT_SAREE_DATA_LIST);
     setCurrentSareeCategories(DEFAULT_SAREE_CATEGORIES);
     setSelectedSarees(new Map());
     setCustomerDetails({ name: '', address: '', gstin: '' });
     setBillNumber('');
     setCurrentDate('');
-    // Reset tax rates, discount, other charges to defaults
     setCgstRate(0);
     setSgstRate(0);
     setIgstRate(0);
@@ -392,7 +394,44 @@ const App: React.FC = () => {
     setAppMessage(null);
     setFileError(null);
     setFileName(null);
-    setSelectedCategory("All");
+    setSelectedCategory(null); // Changed from "All"
+    setCategoryInteractionMade(false); // Reset interaction flag
+  };
+
+  const renderSareeSelectionContent = () => {
+    // Priority 1: Check if any sarees are loaded at all.
+    if (sareesToDisplay.length === 0) {
+      if (currentSareeCategories.length <= 1) { // Typically just ["All"]
+        return <p className="text-[#014D6D] text-center py-4">No sarees loaded. Please go back and load saree data from an Excel file.</p>;
+      } else {
+        // This means categories might exist from a previous load, but the current data is empty.
+        return <p className="text-[#014D6D] text-center py-4">No sarees available in the loaded data. Try loading a new file.</p>;
+      }
+    }
+  
+    // Priority 2: Check if a category button has been clicked.
+    if (!categoryInteractionMade) {
+      return <p className="text-[#014D6D] text-center py-4">Please select a category above to view sarees.</p>;
+    }
+  
+    // Priority 3: Sarees are loaded AND a category button has been clicked. Filter and display.
+    const filteredSarees = selectedCategory === "All" || selectedCategory === null
+      ? sareesToDisplay
+      : sareesToDisplay.filter(saree => saree.category === selectedCategory);
+  
+    if (filteredSarees.length > 0) {
+      return filteredSarees.map(saree => (
+        <SareeItemDisplay
+          key={saree.id}
+          saree={saree}
+          onAddToBill={handleAddSareeToBill}
+          currentQuantityInBill={selectedSarees.get(saree.id)?.quantity || 0}
+        />
+      ));
+    } else {
+      // Sarees exist overall (checked by sareesToDisplay.length > 0), but not in this specific selected category.
+      return <p className="text-[#014D6D] text-center py-4">No sarees found in the '{selectedCategory}' category.</p>;
+    }
   };
 
   if (appScreen === 'upload') {
@@ -448,11 +487,9 @@ const App: React.FC = () => {
               </div>
             )}
             
-            {/* Display fileError first as it's more specific to the upload action */}
             {fileError && (
               <p className="mt-4 text-center text-red-700 bg-red-100 p-3 rounded-md border border-red-300 shadow" role="alert">{fileError}</p>
             )}
-            {/* Then display general appMessage if no specific fileError or if it's a success message related to upload */}
             {appMessage && !fileError && appMessage.type === 'success' && (
                <div className={`mt-4 p-3 rounded-md text-sm text-center shadow bg-green-100 text-[#014D6D] border border-green-300`} role="status">
                  {appMessage.message}
@@ -584,7 +621,10 @@ const App: React.FC = () => {
                       {currentSareeCategories.map(category => (
                         <button
                           key={category}
-                          onClick={() => setSelectedCategory(category)}
+                          onClick={() => {
+                            setSelectedCategory(category);
+                            setCategoryInteractionMade(true);
+                          }}
                           className={`px-4 py-2 text-xl font-medium rounded-lg transition-colors duration-150 ease-in-out focus:outline-none 
                             ${selectedCategory === category 
                               ? 'bg-[#00CEC8] text-[#FFFBDE] shadow-md ring-2 ring-offset-1 ring-[#FF9C5F] ring-offset-[#FFFBDE]'
@@ -596,31 +636,7 @@ const App: React.FC = () => {
                       ))}
                     </div>
                     <div className="space-y-6">
-                      {currentSareeCategories.length <= 1 && sareesToDisplay.length === 0 ? (
-                        <p className="text-[#014D6D] text-center py-4">No sarees loaded. Please go back and load saree data from an Excel file.</p>
-                      ): selectedCategory === null || (selectedCategory === "All" && sareesToDisplay.length === 0) ? (
-                        <p className="text-[#014D6D] text-center py-4">
-                          {sareesToDisplay.length === 0 ? "No sarees available in the loaded data." : "Please select a category to view sarees."}
-                        </p>
-                      ) : (
-                        (() => {
-                          const filteredSarees = selectedCategory === "All" 
-                            ? sareesToDisplay 
-                            : sareesToDisplay.filter(saree => saree.category === selectedCategory);
-                          if (filteredSarees.length > 0) {
-                            return filteredSarees.map(saree => (
-                              <SareeItemDisplay
-                                key={saree.id}
-                                saree={saree}
-                                onAddToBill={handleAddSareeToBill}
-                                currentQuantityInBill={selectedSarees.get(saree.id)?.quantity || 0}
-                              />
-                            ));
-                          } else {
-                            return <p className="text-[#014D6D] text-center py-4">No sarees found in the '{selectedCategory}' category.</p>;
-                          }
-                        })()
-                      )}
+                      {renderSareeSelectionContent()}
                     </div>
                   </section>
                 </div>
