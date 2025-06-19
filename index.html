@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Saree Bill Generator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif; /* A nice default sans-serif font */
+    }
+    /* Additional style for printing the bill to ensure content is not cut off */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #bill-content, #bill-content * {
+        visibility: visible;
+      }
+      #bill-content {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+      }
+    }
+    /* Style for the date input's calendar icon */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      /* Targeting #014D6D */
+      filter: invert(19%) sepia(59%) saturate(2258%) hue-rotate(167deg) brightness(94%) contrast(101%);
+      cursor: pointer;
+    }
+    /* Firefox might need a different approach or might not support direct styling of the icon color easily.
+       This primarily targets WebKit browsers (Chrome, Safari, Edge).
+       For a more consistent icon, consider replacing the default date input with a custom component.
+    */
+  </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.2.0",
+    "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "react-dom/": "https://esm.sh/react-dom@18.2.0/",
+    "react/": "https://esm.sh/react@18.2.0/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-[#FFFBDE]">
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
