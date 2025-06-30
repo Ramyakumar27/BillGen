@@ -11,6 +11,7 @@ const App: React.FC = () => {
   const [currentSareeCategories, setCurrentSareeCategories] = useState<string[]>(DEFAULT_SAREE_CATEGORIES);
   const [selectedSarees, setSelectedSarees] = useState<Map<string, BillItem>>(new Map());
   const [customerDetails, setCustomerDetails] = useState<CustomerDetails>({ name: '', address: '', gstin: '' });
+  const [customerList, setCustomerList] = useState<CustomerDetails[]>([]);
   const [billNumber, setBillNumber] = useState<string>('');
   const [currentDate, setCurrentDate] = useState<string>('');
   
@@ -37,13 +38,9 @@ const App: React.FC = () => {
   const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) {
-      setSareesToDisplay(DEFAULT_SAREE_DATA_LIST);
-      setCurrentSareeCategories(DEFAULT_SAREE_CATEGORIES);
-      setSelectedCategory(null); // Changed from "All"
       setFileError("No file selected. Please select an Excel file to load data.");
       setFileName(null);
       setAppMessage({type: 'info', message: 'File selection cancelled or no file chosen.'});
-      setCategoryInteractionMade(false);
       return;
     }
 
@@ -52,83 +49,99 @@ const App: React.FC = () => {
     setFileError(null);
     setAppMessage(null); 
     setCategoryInteractionMade(false);
-
     setSelectedSarees(new Map());
     
     const reader = new FileReader();
     reader.onload = async (e) => {
       try {
         const data = e.target?.result;
-        if (!data) {
-          throw new Error("Failed to read file data.");
-        }
+        if (!data) throw new Error("Failed to read file data.");
+        
         const workbook = window.XLSX.read(data, { type: 'array' });
-        const sheetName = workbook.SheetNames[0];
-        if (!sheetName) {
-            throw new Error("No sheets found in the Excel file.");
+
+        // --- Process Sarees Sheet (Required) ---
+        const sareeWorksheet = workbook.Sheets['Sarees'];
+        if (!sareeWorksheet) {
+          throw new Error("Excel file must contain a sheet named 'Sarees'. Please check the sheet name.");
         }
-        const worksheet = workbook.Sheets[sheetName];
-        const jsonData = window.XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        const sareeJsonData = window.XLSX.utils.sheet_to_json(sareeWorksheet, { header: 1 });
 
-        if (jsonData.length < 2) {
-          throw new Error("Excel file is empty or has no data rows. Ensure it has a header row (e.g., name, price, category) and at least one data row.");
-        }
-
-        const headers = (jsonData[0] as string[]).map(h => String(h).toLowerCase().trim());
-        const nameIndex = headers.indexOf('name');
-        const priceIndex = headers.indexOf('price');
-        const categoryIndex = headers.indexOf('category');
-
-        if (nameIndex === -1 || priceIndex === -1 || categoryIndex === -1) {
-          throw new Error("Excel file header row must contain 'name', 'price', and 'category' columns. Please check column spellings.");
+        if (sareeJsonData.length < 2) {
+          throw new Error("The 'Sarees' sheet is empty or has no data rows. Ensure it has headers (name, price, category) and at least one data row.");
         }
 
-        const parsedSarees: Saree[] = (jsonData.slice(1) as any[][]).map((rowArray: any[], index: number) => {
-          const name = rowArray[nameIndex];
-          const priceStr = rowArray[priceIndex];
+        const sareeHeaders = (sareeJsonData[0] as string[]).map(h => String(h).toLowerCase().trim());
+        const sareeNameIndex = sareeHeaders.indexOf('name');
+        const priceIndex = sareeHeaders.indexOf('price');
+        const categoryIndex = sareeHeaders.indexOf('category');
+
+        if (sareeNameIndex === -1 || priceIndex === -1 || categoryIndex === -1) {
+          throw new Error("The 'Sarees' sheet header row must contain 'name', 'price', and 'category' columns.");
+        }
+
+        const parsedSarees: Saree[] = (sareeJsonData.slice(1) as any[][]).map((rowArray: any[], index: number) => {
+          const name = rowArray[sareeNameIndex];
+          const price = parseFloat(String(rowArray[priceIndex]));
           const category = rowArray[categoryIndex];
-
-          if (name === undefined || name === null || String(name).trim() === "") return null;
-          if (priceStr === undefined || priceStr === null) return null;
-          if (category === undefined || category === null || String(category).trim() === "") return null;
-          
-          const price = parseFloat(String(priceStr));
-          if (isNaN(price) || price < 0) {
-            console.warn(`Skipping row ${index + 2} in Excel: Invalid price ('${priceStr}'). Price must be a non-negative number.`);
-            return null;
-          }
-          
-          return {
-            id: `excel_saree_${Date.now()}_${index}`,
-            name: String(name).trim(),
-            price,
-            category: String(category).trim(),
-            hsn: UNIFIED_HSN_CODE,
-          };
+          if (!name || isNaN(price) || price < 0 || !category) return null;
+          return { id: `excel_saree_${Date.now()}_${index}`, name: String(name).trim(), price, category: String(category).trim(), hsn: UNIFIED_HSN_CODE };
         }).filter(Boolean) as Saree[];
 
         if (parsedSarees.length === 0) {
-          throw new Error("No valid saree data found in the Excel file after processing. Please check the data rows and ensure they match the required format (name, price, category).");
+          throw new Error("No valid saree data found in the 'Sarees' sheet after processing.");
         }
 
+        // --- Process Customers Sheet (Optional) ---
+        const customerWorksheet = workbook.Sheets['Customers'];
+        let parsedCustomers: CustomerDetails[] = [];
+        let customerLoadMessage = ''; // FIX: Declare variable to hold customer loading status.
+        
+        if (customerWorksheet) {
+          const customerJsonData = window.XLSX.utils.sheet_to_json(customerWorksheet, { header: 1 });
+          if (customerJsonData.length > 1) {
+            const custHeaders = (customerJsonData[0] as string[]).map(h => String(h).toLowerCase().trim());
+            const gstinIndex = custHeaders.indexOf('gstin');
+            const nameIndex = custHeaders.indexOf('name');
+            const addressIndex = custHeaders.indexOf('address');
+
+            if (gstinIndex !== -1 && nameIndex !== -1 && addressIndex !== -1) {
+              parsedCustomers = (customerJsonData.slice(1) as any[][]).map((row: any[]) => {
+                const gstin = row[gstinIndex], name = row[nameIndex], address = row[addressIndex];
+                if (gstin && name && address) return { gstin: String(gstin).trim(), name: String(name).trim(), address: String(address).trim() };
+                return null;
+              }).filter(Boolean) as CustomerDetails[];
+              
+              
+
+            } else {
+              customerLoadMessage = "Warning: 'Customers' sheet is missing required headers: 'gstin', 'name', 'address'. Autofill disabled.";
+            }
+          } else {
+            customerLoadMessage = "Found 'Customers' sheet, but it appears to be empty.";
+          }
+        }
+        
+        // --- Final State Updates ---
         setSareesToDisplay(parsedSarees);
         const uniqueCategories = Array.from(new Set(parsedSarees.map(s => s.category)));
         setCurrentSareeCategories(["All", ...uniqueCategories.sort()]);
-        setSelectedCategory(null); // Changed from "All"
-        setCategoryInteractionMade(false); // Reset interaction flag
+        setCustomerList(parsedCustomers);
+        setSelectedCategory(null);
+        setCategoryInteractionMade(false);
         setAppScreen('main');
-        setCurrentView('selection'); 
-        setSelectionStep('customerInfo'); 
-        setFileError(null); 
+        setCurrentView('selection');
+        setSelectionStep('customerInfo');
+        setFileError(null);
+
+        // FIX: Combine saree and customer messages cleanly.
+        
+      
+
       } catch (error: any) {
         console.error("Error processing Excel file:", error);
-        const userFriendlyMessage = error.message || 'Could not process the Excel file. Please ensure it is a valid .xlsx or .xls file and in the correct format.';
+        const userFriendlyMessage = error.message || 'Could not process the Excel file.';
         setFileError(userFriendlyMessage);
-        setSareesToDisplay(DEFAULT_SAREE_DATA_LIST); 
-        setCurrentSareeCategories(DEFAULT_SAREE_CATEGORIES); 
-        setSelectedCategory(null); // Changed from "All"
-        setCategoryInteractionMade(false); // Reset interaction flag on error
-        setAppMessage({ type: 'error', message: `Failed to load data: ${userFriendlyMessage}` });
+        
       } finally {
         setIsLoadingData(false);
       }
@@ -138,7 +151,6 @@ const App: React.FC = () => {
       const errorMessage = "Failed to read the file. It might be corrupted or inaccessible.";
       setFileError(errorMessage);
       setAppMessage({ type: 'error', message: errorMessage });
-      setCategoryInteractionMade(false); // Reset interaction flag on read error
     };
     reader.readAsArrayBuffer(file);
   };
@@ -206,8 +218,30 @@ const App: React.FC = () => {
 
   const handleCustomerDetailChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setCustomerDetails(prev => ({ ...prev, [name]: value }));
-  }, []);
+  
+    if (name === 'gstin') {
+      // Updater function ensures we're working with the latest state
+      setCustomerDetails(prev => {
+        const uppercaseGstin = value.toUpperCase().trim();
+        const foundCustomer = customerList.find(c => c.gstin?.toUpperCase().trim() === uppercaseGstin);
+        
+        if (foundCustomer) {
+          // On match, autofill name and address
+          return {
+            name: foundCustomer.name,
+            address: foundCustomer.address,
+            gstin: value, // Use the user's input casing for the field
+          };
+        }
+        // On no match, just update the gstin field but preserve existing name/address
+        return { ...prev, gstin: value };
+      });
+    } else {
+      // For manual changes to name/address, update that specific field.
+      // This allows users to override the autofill.
+      setCustomerDetails(prev => ({ ...prev, [name]: value }));
+    }
+  }, [customerList]); // Dependency on customerList is crucial for the autofill logic
 
   const handleBillNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setBillNumber(e.target.value);
@@ -384,6 +418,7 @@ const App: React.FC = () => {
     setCurrentSareeCategories(DEFAULT_SAREE_CATEGORIES);
     setSelectedSarees(new Map());
     setCustomerDetails({ name: '', address: '', gstin: '' });
+    setCustomerList([]);
     setBillNumber('');
     setCurrentDate('');
     setCgstRate(0);
@@ -441,11 +476,11 @@ const App: React.FC = () => {
           <h1 className="text-4xl md:text-5xl font-bold text-[#014D6D]">
             {COMPANY_DETAILS.name} - Bill Generator
           </h1>
-          <p className="text-[#014D6D] mt-2">Load saree data from an Excel file to begin.</p>
+          <p className="text-[#014D6D] mt-2">Load saree and customer data from an Excel file to begin.</p>
         </header>
 
         <section className="bg-[#FFFBDE] p-6 md:p-8 rounded-xl shadow-lg border border-[#00CEC8] w-full max-w-lg">
-          <h2 className="text-2xl font-semibold mb-6 text-[#014D6D] border-b border-[#00CEC8] pb-3 text-center">Load Saree Data</h2>
+          <h2 className="text-2xl font-semibold mb-6 text-[#014D6D] border-b border-[#00CEC8] pb-3 text-center">Load Data from Excel</h2>
           <div className="space-y-4">
             <div>
               <label htmlFor="sareeFile" className="block text-xl font-medium text-[#014D6D] mb-2">
@@ -467,15 +502,25 @@ const App: React.FC = () => {
               />
               {fileName && <p className="text-sm text-[#014D6D] mt-2">Selected file: {fileName}</p>}
             </div>
-            <div id="file-instructions" className="text-sm text-[#014D6D] p-3 bg-[#e6fffa] border border-[#00CEC8] rounded-md">
-              <p className="font-semibold mb-1">Excel File Format Instructions:</p>
-              <ul className="list-disc list-inside ml-2 space-y-0.5">
-                <li>The first row must be a header row.</li>
-                <li>Required column headers: <strong>name</strong> (Text), <strong>price</strong> (Number), <strong>category</strong> (Text).</li>
-                <li>Column names are case-insensitive (e.g., 'Name' or 'name' is fine).</li>
-                <li>Ensure data rows under these columns are correctly formatted.</li>
-              </ul>
+             <div id="file-instructions" className="text-sm text-[#014D6D] p-3 bg-[#e6fffa] border border-[#00CEC8] rounded-md space-y-3">
+              <div>
+                <p className="font-semibold">Sheet 1: "Sarees" (Required)</p>
+                <ul className="list-disc list-inside ml-2 space-y-0.5">
+                  <li>Sheet name must be exactly <strong>Sarees</strong>.</li>
+                  <li>Required columns: <strong>name</strong> (Text), <strong>price</strong> (Number), <strong>category</strong> (Text).</li>
+                </ul>
+              </div>
+              <div>
+                <p className="font-semibold">Sheet 2: "Customers" (Optional)</p>
+                <ul className="list-disc list-inside ml-2 space-y-0.5">
+                  <li>Sheet name must be exactly <strong>Customers</strong>.</li>
+                  <li>Required columns: <strong>gstin</strong>, <strong>name</strong>, <strong>address</strong>.</li>
+                  <li>If provided, typing a known GSTIN will autofill customer details.</li>
+                </ul>
+              </div>
+              <p className="text-xs pt-2 border-t border-[#b3e0d8]">Column headers are case-insensitive. The first row in each sheet must be the header row.</p>
             </div>
+
 
             {isLoadingData && (
               <div className="flex items-center justify-center text-[#014D6D] mt-4 py-2">
@@ -490,15 +535,12 @@ const App: React.FC = () => {
             {fileError && (
               <p className="mt-4 text-center text-red-700 bg-red-100 p-3 rounded-md border border-red-300 shadow" role="alert">{fileError}</p>
             )}
-            {appMessage && !fileError && appMessage.type === 'success' && (
-               <div className={`mt-4 p-3 rounded-md text-sm text-center shadow bg-green-100 text-[#014D6D] border border-green-300`} role="status">
+            {appMessage && !fileError && (appMessage.type === 'success' || appMessage.type === 'info') && (
+               <div className={`mt-4 p-3 rounded-md text-sm text-center shadow 
+                 ${appMessage.type === 'success' ? 'bg-green-100 text-[#014D6D] border border-green-300' : 'bg-blue-100 text-[#014D6D] border border-blue-300'}`} 
+                 role="status">
                  {appMessage.message}
                </div>
-            )}
-             {appMessage && appMessage.type === 'info' && (
-                <div className={`mt-4 p-3 rounded-md text-sm text-center shadow bg-blue-100 text-[#014D6D] border border-blue-300`} role="status">
-                    {appMessage.message}
-                </div>
             )}
           </div>
         </section>
@@ -556,12 +598,12 @@ const App: React.FC = () => {
                       <input type="date" id="currentDate" name="currentDate" value={currentDate} onChange={handleDateChange} onKeyDown={(e) => handleInputKeyDown(e, 'customerName')} className="w-full p-2 border border-[#00CEC8] rounded-md shadow-sm focus:ring-[#FF9C5F] focus:border-[#FF9C5F] bg-white text-black text-lg" placeholder="Select Date" required />
                     </div>
                     <div>
-                      <label htmlFor="customerName" className="block text-xl font-medium text-[#014D6D] mb-1">Customer Name *</label>
-                      <input type="text" id="customerName" name="name" value={customerDetails.name} onChange={handleCustomerDetailChange} onKeyDown={(e) => handleInputKeyDown(e, 'customerGstin')} className="w-full p-2 border border-[#00CEC8] rounded-md shadow-sm focus:ring-[#FF9C5F] focus:border-[#FF9C5F] bg-white text-black text-lg" placeholder="Enter customer's Name" required />
+                      <label htmlFor="customerGstin" className="block text-xl font-medium text-[#014D6D] mb-1">GSTIN</label>
+                      <input type="text" id="customerGstin" name="gstin" value={customerDetails.gstin || ''} onChange={handleCustomerDetailChange} onKeyDown={(e) => handleInputKeyDown(e, 'customerAddress')} className="w-full p-2 border border-[#00CEC8] rounded-md shadow-sm focus:ring-[#FF9C5F] focus:border-[#FF9C5F] bg-white text-black text-lg" placeholder="Type to autofill name & address" />
                     </div>
                     <div>
-                      <label htmlFor="customerGstin" className="block text-xl font-medium text-[#014D6D] mb-1">GSTIN</label>
-                      <input type="text" id="customerGstin" name="gstin" value={customerDetails.gstin || ''} onChange={handleCustomerDetailChange} onKeyDown={(e) => handleInputKeyDown(e, 'customerAddress')} className="w-full p-2 border border-[#00CEC8] rounded-md shadow-sm focus:ring-[#FF9C5F] focus:border-[#FF9C5F] bg-white text-black text-lg" placeholder="Enter customer's GSTIN" />
+                      <label htmlFor="customerName" className="block text-xl font-medium text-[#014D6D] mb-1">Customer Name *</label>
+                      <input type="text" id="customerName" name="name" value={customerDetails.name} onChange={handleCustomerDetailChange} onKeyDown={(e) => handleInputKeyDown(e, 'customerGstin')} className="w-full p-2 border border-[#00CEC8] rounded-md shadow-sm focus:ring-[#FF9C5F] focus:border-[#FF9C5F] bg-white text-black text-lg" placeholder="Enter customer's Name" required />
                     </div>
                     <div className="md:col-span-2">
                       <label htmlFor="customerAddress" className="block text-xl font-medium text-[#014D6D] mb-1">Address *</label>
