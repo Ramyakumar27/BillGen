@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BillItem, CustomerDetails, CompanyDetails } from '../types';
 import { UNIFIED_HSN_CODE } from '../constants';
@@ -23,7 +22,7 @@ interface BillDisplayProps {
   grandTotal: number;
 }
 
-const MIN_TABLE_ROWS = 14; 
+const MIN_TABLE_ROWS = 16; 
 
 const numberToWordsInRupees = (originalNum: number): string => {
   const a = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
@@ -135,7 +134,7 @@ const BillDisplay: React.FC<BillDisplayProps> = ({
 
   if (billItems.length === 0 && emptyRowCount === MIN_TABLE_ROWS) { 
     return (
-      <div id="bill-content" className="bg-white p-6 md:p-8 border border-gray-400 rounded-lg shadow-sm text-black flex flex-col justify-center items-center min-h-[800px]">
+      <div id="bill-content" className="bg-white p-6 md:p-8 border-2 border-black rounded-lg shadow-sm text-black flex flex-col justify-center items-center min-h-[800px]">
         <div className="text-center text-black py-10">
           <p className="text-lg">No items in the bill to display.</p>
           <p className="mt-2 text-base">Please go back and add items to your cart.</p>
@@ -152,7 +151,7 @@ const BillDisplay: React.FC<BillDisplayProps> = ({
   return (
     <div 
       id="bill-content" 
-      className="bg-white p-4 md:p-6 border border-gray-400 rounded-lg shadow-sm text-black flex flex-col min-h-[800px]"
+      className="bg-white p-4 md:p-6 border-2 border-black rounded-lg shadow-sm text-black flex flex-col min-h-[800px]"
     >
       {/* Bill Header */}
       <div className="mb-2">
@@ -202,7 +201,7 @@ const BillDisplay: React.FC<BillDisplayProps> = ({
       </div>
 
       {/* Separator Line */}
-      <div className="w-full border-b border-gray-400 my-3"></div>
+      <div className="w-full border-b-2 border-black my-3"></div>
 
       {/* Bill Info and Customer Details */}
       <div className="flex justify-between mb-6 text-base">
@@ -223,28 +222,28 @@ const BillDisplay: React.FC<BillDisplayProps> = ({
       {/* Items Table Section */}
        <div className="flex-grow flex flex-col mb-0">
         <div 
-          className="overflow-x-auto border-l border-r border-gray-400" 
+          className="overflow-x-auto border-l-2 border-r-2 border-black" 
           style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}
         >
           <table className="w-full text-base text-left text-black" style={{ flexGrow: 1 }}>
             <thead className="text-sm text-black uppercase">
-              <tr className="border-t border-b border-gray-400">
-                <th scope="col" className="px-0.5 py-2 md:px-1 md:py-2 text-center border-r border-gray-300" style={{ textAlign: 'center' }}>Sno</th>
-                <th scope="col" className="w-[50%] px-3 py-2 text-center border-r border-gray-300" style={{ textAlign: 'center' }}>Particulars</th>
-                <th scope="col" className="px-1 py-2 md:px-2 md:py-2 text-center border-r border-gray-300" style={{ textAlign: 'center' }}>HSN</th>
-                <th scope="col" className="px-1 py-2 md:px-2 md:py-2 text-center border-r border-gray-300" style={{ textAlign: 'center' }}>Qty</th>
-                <th scope="col" className="px-0.5 py-2 md:px-0.5 md:py-2 text-center border-r border-gray-300" style={{ textAlign: 'center' }}>Rate (₹)</th>
+              <tr className="border-t-2 border-b-2 border-black">
+                <th scope="col" className="px-0.5 py-2 md:px-1 md:py-2 text-center border-r-2 border-black" style={{ textAlign: 'center' }}>Sno</th>
+                <th scope="col" className="w-[50%] px-3 py-2 text-center border-r-2 border-black" style={{ textAlign: 'center' }}>Particulars</th>
+                <th scope="col" className="px-1 py-2 md:px-2 md:py-2 text-center border-r-2 border-black" style={{ textAlign: 'center' }}>HSN</th>
+                <th scope="col" className="px-1 py-2 md:px-2 md:py-2 text-center border-r-2 border-black" style={{ textAlign: 'center' }}>Qty</th>
+                <th scope="col" className="px-0.5 py-2 md:px-0.5 md:py-2 text-center border-r-2 border-black" style={{ textAlign: 'center' }}>Rate (₹)</th>
                 <th scope="col" className="px-0.5 py-2 md:px-1 md:py-2 text-center" style={{ textAlign: 'center' }}>Amount (₹)</th>
               </tr>
             </thead>
             <tbody>
               {billItems.map((item, index) => (
                 <tr key={item.id} className="bg-white hover:bg-gray-50">
-                  <td className="px-0.5 py-1 md:px-1 md:py-1 text-center border-r border-gray-300">{index + 1}</td>
-                  <td className="px-3 py-1 font-medium text-black border-r border-gray-300">{item.name}</td>
-                  <td className="px-1 py-1 md:px-2 md:py-1 text-center border-r border-gray-300">{UNIFIED_HSN_CODE}</td>
-                  <td className="px-1 py-1 md:px-2 md:py-1 text-center border-r border-gray-300">{item.quantity}</td>
-                  <td className="px-0.5 py-1 md:px-0.5 md:py-1 text-right border-r border-gray-300">
+                  <td className="px-0.5 py-1 md:px-1 md:py-1 text-center border-r-2 border-black">{index + 1}</td>
+                  <td className="px-3 py-1 font-medium text-black border-r-2 border-black">{item.name}</td>
+                  <td className="px-1 py-1 md:px-2 md:py-1 text-center border-r-2 border-black">{UNIFIED_HSN_CODE}</td>
+                  <td className="px-1 py-1 md:px-2 md:py-1 text-center border-r-2 border-black">{item.quantity}</td>
+                  <td className="px-0.5 py-1 md:px-0.5 md:py-1 text-right border-r-2 border-black">
                     {item.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
                   <td className="px-0.5 py-1 md:px-1 md:py-1 text-right">
@@ -254,11 +253,11 @@ const BillDisplay: React.FC<BillDisplayProps> = ({
               ))}
               {Array.from({ length: emptyRowCount }).map((_, index) => (
                 <tr key={`empty-${index}`} className="bg-white">
-                  <td className="px-0.5 py-1 md:px-1 md:py-1 text-center border-r border-gray-300 h-[32px]">&nbsp;</td>
-                  <td className="px-3 py-1 border-r border-gray-300">&nbsp;</td>
-                  <td className="px-1 py-1 md:px-2 md:py-1 text-center border-r border-gray-300">&nbsp;</td>
-                  <td className="px-1 py-1 md:px-2 md:py-1 text-center border-r border-gray-300">&nbsp;</td>
-                  <td className="px-0.5 py-1 md:px-0.5 md:py-1 text-right border-r border-gray-300">&nbsp;</td>
+                  <td className="px-0.5 py-1 md:px-1 md:py-1 text-center border-r-2 border-black h-[32px]">&nbsp;</td>
+                  <td className="px-3 py-1 border-r-2 border-black">&nbsp;</td>
+                  <td className="px-1 py-1 md:px-2 md:py-1 text-center border-r-2 border-black">&nbsp;</td>
+                  <td className="px-1 py-1 md:px-2 md:py-1 text-center border-r-2 border-black">&nbsp;</td>
+                  <td className="px-0.5 py-1 md:px-0.5 md:py-1 text-right border-r-2 border-black">&nbsp;</td>
                   <td className="px-0.5 py-1 md:px-1 md:py-1 text-right">&nbsp;</td>
                 </tr>
               ))}
@@ -267,11 +266,11 @@ const BillDisplay: React.FC<BillDisplayProps> = ({
         </div>
       </div>
       
-      <div className="w-full h-px bg-gray-400"></div>
+      <div className="w-full border-t-2 border-black"></div>
 
-      <div className="mt-auto border-l border-r border-b border-gray-400 rounded-b-md p-4 bg-white">
+      <div className="mt-auto border-l-2 border-r-2 border-b-2 border-black rounded-b-md p-4 bg-white">
         <div className="flex justify-between items-start">
-           <div className="w-3/5 pr-4 border-r border-gray-400">
+           <div className="w-3/5 pr-4 border-r-2 border-black">
             <div>
               <p className="text-sm font-semibold text-black mb-1">Amount in Words:</p>
               <p className="text-sm text-black leading-tight">
@@ -324,7 +323,7 @@ const BillDisplay: React.FC<BillDisplayProps> = ({
                 <span className="text-black">Others :</span>
                 <span className="font-medium text-black">₹{otherCharges.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
-            <div className="flex justify-between text-lg font-bold text-black border-t border-gray-400 pt-1 mt-1">
+            <div className="flex justify-between text-lg font-bold text-black border-t-2 border-black pt-1 mt-1">
               <span>Grand Total:</span>
               <span>₹{grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
@@ -337,12 +336,12 @@ const BillDisplay: React.FC<BillDisplayProps> = ({
         <div className="flex justify-between"> 
           <div className="text-left">
             <p className="font-semibold text-black mb-8 invisible">For {companyDetails.name}</p>
-            <div className="border-t border-gray-400 w-48"></div>
+            <div className="border-t-2 border-black w-48"></div>
             <p className="mt-1 text-black">Receiver's Signature & Seal</p>
           </div>
           <div className="text-right">
             <p className="font-semibold text-black mb-8">For {companyDetails.name}</p>
-            <div className="border-t border-gray-400 w-48 ml-auto"></div>
+            <div className="border-t-2 border-black w-48 ml-auto"></div>
             <p className="mt-1 text-black w-48 ml-auto text-center">Proprietor Signature</p>
           </div>
         </div>
