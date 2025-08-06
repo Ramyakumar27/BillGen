@@ -111,7 +111,11 @@ const App: React.FC = () => {
                 return null;
               }).filter(Boolean) as CustomerDetails[];
               
-              
+              if (parsedCustomers.length > 0) {
+                customerLoadMessage = `Successfully loaded ${parsedCustomers.length} customers for autofill.`;
+              } else {
+                customerLoadMessage = "Found 'Customers' sheet, but no valid customer data was loaded.";
+              }
 
             } else {
               customerLoadMessage = "Warning: 'Customers' sheet is missing required headers: 'gstin', 'name', 'address'. Autofill disabled.";
@@ -134,8 +138,8 @@ const App: React.FC = () => {
         setFileError(null);
 
         // FIX: Combine saree and customer messages cleanly.
-        
-      
+        const successMessage = `Loaded ${parsedSarees.length} sarees. ${customerLoadMessage}`.trim();
+        setAppMessage({ type: 'success', message: successMessage });
 
       } catch (error: any) {
         console.error("Error processing Excel file:", error);
@@ -437,16 +441,16 @@ const App: React.FC = () => {
     // Priority 1: Check if any sarees are loaded at all.
     if (sareesToDisplay.length === 0) {
       if (currentSareeCategories.length <= 1) { // Typically just ["All"]
-        return <p className="text-[#014D6D] text-center py-4">No sarees loaded. Please go back and load saree data from an Excel file.</p>;
+        return <p className="text-black text-center py-4">No sarees loaded. Please go back and load saree data from an Excel file.</p>;
       } else {
         // This means categories might exist from a previous load, but the current data is empty.
-        return <p className="text-[#014D6D] text-center py-4">No sarees available in the loaded data. Try loading a new file.</p>;
+        return <p className="text-black text-center py-4">No sarees available in the loaded data. Try loading a new file.</p>;
       }
     }
   
     // Priority 2: Check if a category button has been clicked.
     if (!categoryInteractionMade) {
-      return <p className="text-[#014D6D] text-center py-4">Please select a category above to view sarees.</p>;
+      return <p className="text-black text-center py-4">Please select a category above to view sarees.</p>;
     }
   
     // Priority 3: Sarees are loaded AND a category button has been clicked. Filter and display.
@@ -465,25 +469,25 @@ const App: React.FC = () => {
       ));
     } else {
       // Sarees exist overall (checked by sareesToDisplay.length > 0), but not in this specific selected category.
-      return <p className="text-[#014D6D] text-center py-4">No sarees found in the '{selectedCategory}' category.</p>;
+      return <p className="text-black text-center py-4">No sarees found in the '{selectedCategory}' category.</p>;
     }
   };
 
   if (appScreen === 'upload') {
     return (
-      <div className="min-h-screen bg-[#FFFBDE] p-4 md:p-8 flex flex-col items-center justify-center">
+      <div className="min-h-screen p-4 md:p-8 flex flex-col items-center justify-center">
         <header className="mb-8 text-center w-full max-w-4xl">
-          <h1 className="text-4xl md:text-5xl font-bold text-[#014D6D]">
+          <h1 className="text-4xl md:text-5xl font-bold text-black">
             {COMPANY_DETAILS.name} - Bill Generator
           </h1>
-          <p className="text-[#014D6D] mt-2">Load saree and customer data from an Excel file to begin.</p>
+          <p className="text-black mt-2">Load saree and customer data from an Excel file to begin.</p>
         </header>
 
-        <section className="bg-[#FFFBDE] p-6 md:p-8 rounded-xl shadow-lg border border-[#00CEC8] w-full max-w-lg">
-          <h2 className="text-2xl font-semibold mb-6 text-[#014D6D] border-b border-[#00CEC8] pb-3 text-center">Load Data from Excel</h2>
+        <section className="bg-white/80 backdrop-blur-sm p-6 md:p-8 rounded-xl shadow-lg border border-[#72a7e8] w-full max-w-lg">
+          <h2 className="text-2xl font-semibold mb-6 text-black border-b border-[#72a7e8] pb-3 text-center">Load Data from Excel</h2>
           <div className="space-y-4">
             <div>
-              <label htmlFor="sareeFile" className="block text-xl font-medium text-[#014D6D] mb-2">
+              <label htmlFor="sareeFile" className="block text-xl font-medium text-black mb-2">
                 Upload Excel File <span className="text-sm">(.xlsx, .xls)</span>:
               </label>
               <input
@@ -491,18 +495,18 @@ const App: React.FC = () => {
                 id="sareeFile"
                 accept=".xlsx, .xls, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 onChange={handleFileUpload}
-                className="block w-full text-lg text-[#014D6D]
+                className="block w-full text-lg text-black
                            file:mr-4 file:py-2 file:px-4
                            file:rounded-md file:border-0
                            file:text-sm file:font-semibold
-                           file:bg-[#00CEC8] file:text-[#FFFBDE]
-                           hover:file:bg-[#FF9C5F] hover:file:text-[#014D6D]
-                           focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF9C5F] focus:ring-offset-[#FFFBDE] cursor-pointer"
+                           file:bg-[#72a7e8] file:text-white
+                           hover:file:bg-[#fd8152] hover:file:text-white
+                           focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#fd8152] focus:ring-offset-white/80 cursor-pointer"
                 aria-describedby="file-instructions"
               />
-              {fileName && <p className="text-sm text-[#014D6D] mt-2">Selected file: {fileName}</p>}
+              {fileName && <p className="text-sm text-black mt-2">Selected file: {fileName}</p>}
             </div>
-             <div id="file-instructions" className="text-sm text-[#014D6D] p-3 bg-[#e6fffa] border border-[#00CEC8] rounded-md space-y-3">
+             <div id="file-instructions" className="text-sm text-black p-3 bg-[#72a7e8]/20 border border-[#72a7e8] rounded-md space-y-3">
               <div>
                 <p className="font-semibold">Sheet 1: "Sarees" (Required)</p>
                 <ul className="list-disc list-inside ml-2 space-y-0.5">
@@ -518,13 +522,13 @@ const App: React.FC = () => {
                   <li>If provided, typing a known GSTIN will autofill customer details.</li>
                 </ul>
               </div>
-              <p className="text-xs pt-2 border-t border-[#b3e0d8]">Column headers are case-insensitive. The first row in each sheet must be the header row.</p>
+              <p className="text-xs pt-2 border-t border-[#72a7e8]/50">Column headers are case-insensitive. The first row in each sheet must be the header row.</p>
             </div>
 
 
             {isLoadingData && (
-              <div className="flex items-center justify-center text-[#014D6D] mt-4 py-2">
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-[#00CEC8]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <div className="flex items-center justify-center text-black mt-4 py-2">
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-[#72a7e8]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
@@ -537,7 +541,7 @@ const App: React.FC = () => {
             )}
             {appMessage && !fileError && (appMessage.type === 'success' || appMessage.type === 'info') && (
                <div className={`mt-4 p-3 rounded-md text-sm text-center shadow 
-                 ${appMessage.type === 'success' ? 'bg-green-100 text-[#014D6D] border border-green-300' : 'bg-blue-100 text-[#014D6D] border border-blue-300'}`} 
+                 ${appMessage.type === 'success' ? 'bg-green-100 text-black border border-green-300' : 'bg-blue-100 text-black border border-blue-300'}`} 
                  role="status">
                  {appMessage.message}
                </div>
@@ -545,9 +549,9 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        <footer className="text-center mt-12 py-6 border-t border-[#00CEC8] w-full max-w-4xl">
-          <p className="text-sm text-[#014D6D]">&copy; {new Date().getFullYear()} {COMPANY_DETAILS.name}. All rights reserved.</p>
-          <p className="text-xs text-[#014D6D] opacity-75 mt-1">Designed with Passion for Saree Craftsmanship</p>
+        <footer className="text-center mt-12 py-6 border-t border-[#72a7e8]/50 w-full max-w-4xl">
+          <p className="text-sm text-black">&copy; {new Date().getFullYear()} {COMPANY_DETAILS.name}. All rights reserved.</p>
+          <p className="text-xs text-black opacity-75 mt-1">Designed with Passion for Saree Craftsmanship</p>
         </footer>
       </div>
     );
@@ -555,15 +559,15 @@ const App: React.FC = () => {
 
 
   return (
-    <div className="min-h-screen bg-[#FFFBDE] p-4 md:p-8">
+    <div className="min-h-screen p-4 md:p-8">
        <header className="mb-6 text-center relative">
-        <h1 className="text-4xl md:text-5xl font-bold text-[#014D6D]">
+        <h1 className="text-4xl md:text-5xl font-bold text-black">
           {COMPANY_DETAILS.name} - Bill Generator
         </h1>
-        <p className="text-[#014D6D] mt-2">Create and manage your saree bills with ease.</p>
+        <p className="text-black mt-2">Create and manage your saree bills with ease.</p>
          <button
             onClick={handleSwitchToUploadScreen}
-            className="absolute top-0 right-0 mt-2 mr-2 md:mt-0 md:mr-0 px-3 py-1.5 bg-[#FF9C5F] text-[#014D6D] text-xs font-semibold rounded-md shadow-sm hover:bg-[#00CEC8] hover:text-[#FFFBDE] transition-colors duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[#FF9C5F]"
+            className="absolute top-0 right-0 mt-2 mr-2 md:mt-0 md:mr-0 px-3 py-1.5 bg-[#fd8152] text-black text-xs font-semibold rounded-md shadow-sm hover:bg-[#72a7e8] hover:text-white transition-colors duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[#fd8152]"
             title="Load new saree data from Excel"
           >
             Load New Data
@@ -572,9 +576,9 @@ const App: React.FC = () => {
       
       {appMessage && (
         <div className={`max-w-xl mx-auto mb-6 p-3 rounded-md text-sm text-center shadow
-          ${appMessage.type === 'success' ? 'bg-green-100 text-[#014D6D] border border-green-300' : 
-            appMessage.type === 'error' ? 'bg-red-100 text-[#014D6D] border border-red-300' :
-            'bg-blue-100 text-[#014D6D] border border-blue-300'}`}
+          ${appMessage.type === 'success' ? 'bg-green-100 text-black border border-green-300' : 
+            appMessage.type === 'error' ? 'bg-red-100 text-black border border-red-300' :
+            'bg-blue-100 text-black border border-blue-300'}`}
             role={appMessage.type === 'error' ? 'alert' : 'status'}>
           {appMessage.message}
         </div>
@@ -585,60 +589,60 @@ const App: React.FC = () => {
           <>
             {selectionStep === 'customerInfo' ? (
               <div className="max-w-xl mx-auto space-y-8">
-                <section className="bg-[#FFFBDE] p-6 rounded-xl shadow-lg border border-[#00CEC8]">
-                  <h2 className="text-2xl font-semibold mb-6 text-[#014D6D] border-b border-[#00CEC8] pb-3">Customer & Invoice Details</h2>
+                <section className="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-[#72a7e8]">
+                  <h2 className="text-2xl font-semibold mb-6 text-black border-b border-[#72a7e8] pb-3">Customer & Invoice Details</h2>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 mb-4">
                     <div>
-                      <label htmlFor="billNumber" className="block text-xl font-medium text-[#014D6D] mb-1">Invoice No: *</label>
-                      <input type="text" id="billNumber" name="billNumber" value={billNumber} onChange={handleBillNumberChange} onKeyDown={(e) => handleInputKeyDown(e, 'currentDate')} className="w-full p-2 border border-[#00CEC8] rounded-md shadow-sm focus:ring-[#FF9C5F] focus:border-[#FF9C5F] bg-white text-black text-lg" placeholder="Enter Invoice Number" required />
+                      <label htmlFor="billNumber" className="block text-xl font-medium text-black mb-1">Invoice No: *</label>
+                      <input type="text" id="billNumber" name="billNumber" value={billNumber} onChange={handleBillNumberChange} onKeyDown={(e) => handleInputKeyDown(e, 'currentDate')} className="w-full p-2 border border-[#72a7e8] rounded-md shadow-sm focus:ring-[#fd8152] focus:border-[#fd8152] bg-white text-black text-lg" placeholder="Enter Invoice Number" required />
                     </div>
                     <div>
-                      <label htmlFor="currentDate" className="block text-xl font-medium text-[#014D6D] mb-1">Date: *</label>
-                      <input type="date" id="currentDate" name="currentDate" value={currentDate} onChange={handleDateChange} onKeyDown={(e) => handleInputKeyDown(e, 'customerName')} className="w-full p-2 border border-[#00CEC8] rounded-md shadow-sm focus:ring-[#FF9C5F] focus:border-[#FF9C5F] bg-white text-black text-lg" placeholder="Select Date" required />
+                      <label htmlFor="currentDate" className="block text-xl font-medium text-black mb-1">Date: *</label>
+                      <input type="date" id="currentDate" name="currentDate" value={currentDate} onChange={handleDateChange} onKeyDown={(e) => handleInputKeyDown(e, 'customerName')} className="w-full p-2 border border-[#72a7e8] rounded-md shadow-sm focus:ring-[#fd8152] focus:border-[#fd8152] bg-white text-black text-lg" placeholder="Select Date" required />
                     </div>
                     <div>
-                      <label htmlFor="customerGstin" className="block text-xl font-medium text-[#014D6D] mb-1">GSTIN</label>
-                      <input type="text" id="customerGstin" name="gstin" value={customerDetails.gstin || ''} onChange={handleCustomerDetailChange} onKeyDown={(e) => handleInputKeyDown(e, 'customerAddress')} className="w-full p-2 border border-[#00CEC8] rounded-md shadow-sm focus:ring-[#FF9C5F] focus:border-[#FF9C5F] bg-white text-black text-lg" placeholder="Type to autofill name & address" />
+                      <label htmlFor="customerGstin" className="block text-xl font-medium text-black mb-1">GSTIN</label>
+                      <input type="text" id="customerGstin" name="gstin" value={customerDetails.gstin || ''} onChange={handleCustomerDetailChange} onKeyDown={(e) => handleInputKeyDown(e, 'customerAddress')} className="w-full p-2 border border-[#72a7e8] rounded-md shadow-sm focus:ring-[#fd8152] focus:border-[#fd8152] bg-white text-black text-lg" placeholder="Type to autofill name & address" />
                     </div>
                     <div>
-                      <label htmlFor="customerName" className="block text-xl font-medium text-[#014D6D] mb-1">Customer Name *</label>
-                      <input type="text" id="customerName" name="name" value={customerDetails.name} onChange={handleCustomerDetailChange} onKeyDown={(e) => handleInputKeyDown(e, 'customerGstin')} className="w-full p-2 border border-[#00CEC8] rounded-md shadow-sm focus:ring-[#FF9C5F] focus:border-[#FF9C5F] bg-white text-black text-lg" placeholder="Enter customer's Name" required />
+                      <label htmlFor="customerName" className="block text-xl font-medium text-black mb-1">Customer Name *</label>
+                      <input type="text" id="customerName" name="name" value={customerDetails.name} onChange={handleCustomerDetailChange} onKeyDown={(e) => handleInputKeyDown(e, 'customerGstin')} className="w-full p-2 border border-[#72a7e8] rounded-md shadow-sm focus:ring-[#fd8152] focus:border-[#fd8152] bg-white text-black text-lg" placeholder="Enter customer's Name" required />
                     </div>
                     <div className="md:col-span-2">
-                      <label htmlFor="customerAddress" className="block text-xl font-medium text-[#014D6D] mb-1">Address *</label>
-                      <input type="text" id="customerAddress" name="address" value={customerDetails.address} onChange={handleCustomerDetailChange} onKeyDown={(e) => handleInputKeyDown(e, 'cgstRate')} className="w-full p-2 border border-[#00CEC8] rounded-md shadow-sm focus:ring-[#FF9C5F] focus:border-[#FF9C5F] bg-white text-black text-lg" placeholder="Enter customer's address" required />
+                      <label htmlFor="customerAddress" className="block text-xl font-medium text-black mb-1">Address *</label>
+                      <input type="text" id="customerAddress" name="address" value={customerDetails.address} onChange={handleCustomerDetailChange} onKeyDown={(e) => handleInputKeyDown(e, 'cgstRate')} className="w-full p-2 border border-[#72a7e8] rounded-md shadow-sm focus:ring-[#fd8152] focus:border-[#fd8152] bg-white text-black text-lg" placeholder="Enter customer's address" required />
                     </div>
                     
                     <div>
-                      <label htmlFor="cgstRate" className="block text-xl font-medium text-[#014D6D] mb-1">CGST Rate (%):</label>
-                      <input type="number" id="cgstRate" value={cgstRate === 0 && document.activeElement !== document.getElementById('cgstRate') ? '' : cgstRate.toString()} onChange={handleRateChange(setCgstRate)} onFocus={(e) => e.target.value === '0' ? e.target.value = '' : null} onBlur={(e) => e.target.value === '' ? setCgstRate(0) : null} onKeyDown={(e) => handleInputKeyDown(e, 'sgstRate')} className="w-full p-2 border border-[#00CEC8] rounded-md shadow-sm focus:ring-[#FF9C5F] focus:border-[#FF9C5F] bg-white text-black text-lg" placeholder="e.g., 2.5" min="0" step="0.01" />
+                      <label htmlFor="cgstRate" className="block text-xl font-medium text-black mb-1">CGST Rate (%):</label>
+                      <input type="number" id="cgstRate" value={cgstRate === 0 && document.activeElement !== document.getElementById('cgstRate') ? '' : cgstRate.toString()} onChange={handleRateChange(setCgstRate)} onFocus={(e) => e.target.value === '0' ? e.target.value = '' : null} onBlur={(e) => e.target.value === '' ? setCgstRate(0) : null} onKeyDown={(e) => handleInputKeyDown(e, 'sgstRate')} className="w-full p-2 border border-[#72a7e8] rounded-md shadow-sm focus:ring-[#fd8152] focus:border-[#fd8152] bg-white text-black text-lg" placeholder="e.g., 2.5" min="0" step="0.01" />
                     </div>
                     <div>
-                      <label htmlFor="sgstRate" className="block text-xl font-medium text-[#014D6D] mb-1">SGST Rate (%):</label>
-                      <input type="number" id="sgstRate" value={sgstRate === 0 && document.activeElement !== document.getElementById('sgstRate') ? '' : sgstRate.toString()} onChange={handleRateChange(setSgstRate)} onFocus={(e) => e.target.value === '0' ? e.target.value = '' : null} onBlur={(e) => e.target.value === '' ? setSgstRate(0) : null} onKeyDown={(e) => handleInputKeyDown(e, 'igstRate')} className="w-full p-2 border border-[#00CEC8] rounded-md shadow-sm focus:ring-[#FF9C5F] focus:border-[#FF9C5F] bg-white text-black text-lg" placeholder="e.g., 2.5" min="0" step="0.01" />
+                      <label htmlFor="sgstRate" className="block text-xl font-medium text-black mb-1">SGST Rate (%):</label>
+                      <input type="number" id="sgstRate" value={sgstRate === 0 && document.activeElement !== document.getElementById('sgstRate') ? '' : sgstRate.toString()} onChange={handleRateChange(setSgstRate)} onFocus={(e) => e.target.value === '0' ? e.target.value = '' : null} onBlur={(e) => e.target.value === '' ? setSgstRate(0) : null} onKeyDown={(e) => handleInputKeyDown(e, 'igstRate')} className="w-full p-2 border border-[#72a7e8] rounded-md shadow-sm focus:ring-[#fd8152] focus:border-[#fd8152] bg-white text-black text-lg" placeholder="e.g., 2.5" min="0" step="0.01" />
                     </div>
                     <div>
-                      <label htmlFor="igstRate" className="block text-xl font-medium text-[#014D6D] mb-1">IGST Rate (%):</label>
-                      <input type="number" id="igstRate" value={igstRate === 0 && document.activeElement !== document.getElementById('igstRate') ? '' : igstRate.toString()} onChange={handleRateChange(setIgstRate)} onFocus={(e) => e.target.value === '0' ? e.target.value = '' : null} onBlur={(e) => e.target.value === '' ? setIgstRate(0) : null} onKeyDown={(e) => handleInputKeyDown(e, 'discountPercentage')} className="w-full p-2 border border-[#00CEC8] rounded-md shadow-sm focus:ring-[#FF9C5F] focus:border-[#FF9C5F] bg-white text-black text-lg" placeholder="e.g., 5" min="0" step="0.01" />
+                      <label htmlFor="igstRate" className="block text-xl font-medium text-black mb-1">IGST Rate (%):</label>
+                      <input type="number" id="igstRate" value={igstRate === 0 && document.activeElement !== document.getElementById('igstRate') ? '' : igstRate.toString()} onChange={handleRateChange(setIgstRate)} onFocus={(e) => e.target.value === '0' ? e.target.value = '' : null} onBlur={(e) => e.target.value === '' ? setIgstRate(0) : null} onKeyDown={(e) => handleInputKeyDown(e, 'discountPercentage')} className="w-full p-2 border border-[#72a7e8] rounded-md shadow-sm focus:ring-[#fd8152] focus:border-[#fd8152] bg-white text-black text-lg" placeholder="e.g., 5" min="0" step="0.01" />
                     </div>
                     <div>
-                      <label htmlFor="discountPercentage" className="block text-xl font-medium text-[#014D6D] mb-1">Discount (%):</label>
-                      <input type="number" id="discountPercentage" value={discountPercentage === 0 && document.activeElement !== document.getElementById('discountPercentage') ? '' : discountPercentage.toString()} onChange={handleDiscountChange} onFocus={(e) => e.target.value === '0' ? e.target.value = '' : null} onBlur={(e) => e.target.value === '' ? setDiscountPercentage(0) : null} onKeyDown={(e) => handleInputKeyDown(e, 'otherCharges')} className="w-full p-2 border border-[#00CEC8] rounded-md shadow-sm focus:ring-[#FF9C5F] focus:border-[#FF9C5F] bg-white text-black text-lg" placeholder="e.g., 10" min="0" step="0.01" />
+                      <label htmlFor="discountPercentage" className="block text-xl font-medium text-black mb-1">Discount (%):</label>
+                      <input type="number" id="discountPercentage" value={discountPercentage === 0 && document.activeElement !== document.getElementById('discountPercentage') ? '' : discountPercentage.toString()} onChange={handleDiscountChange} onFocus={(e) => e.target.value === '0' ? e.target.value = '' : null} onBlur={(e) => e.target.value === '' ? setDiscountPercentage(0) : null} onKeyDown={(e) => handleInputKeyDown(e, 'otherCharges')} className="w-full p-2 border border-[#72a7e8] rounded-md shadow-sm focus:ring-[#fd8152] focus:border-[#fd8152] bg-white text-black text-lg" placeholder="e.g., 10" min="0" step="0.01" />
                     </div>
                      <div>
-                      <label htmlFor="otherCharges" className="block text-xl font-medium text-[#014D6D] mb-1">Other Charges (₹):</label>
-                      <input type="number" id="otherCharges" value={otherCharges === 0 && document.activeElement !== document.getElementById('otherCharges') ? '' : otherCharges.toString()} onChange={handleOtherChargesChange} onFocus={(e) => e.target.value === '0' ? e.target.value = '' : null} onBlur={(e) => e.target.value === '' ? setOtherCharges(0) : null} onKeyDown={(e) => handleInputKeyDown(e, 'proceedToSareeSelectionButton')} className="w-full p-2 border border-[#00CEC8] rounded-md shadow-sm focus:ring-[#FF9C5F] focus:border-[#FF9C5F] bg-white text-black text-lg" placeholder="e.g., 50 or -20" step="0.01" />
+                      <label htmlFor="otherCharges" className="block text-xl font-medium text-black mb-1">Other Charges (₹):</label>
+                      <input type="number" id="otherCharges" value={otherCharges === 0 && document.activeElement !== document.getElementById('otherCharges') ? '' : otherCharges.toString()} onChange={handleOtherChargesChange} onFocus={(e) => e.target.value === '0' ? e.target.value = '' : null} onBlur={(e) => e.target.value === '' ? setOtherCharges(0) : null} onKeyDown={(e) => handleInputKeyDown(e, 'proceedToSareeSelectionButton')} className="w-full p-2 border border-[#72a7e8] rounded-md shadow-sm focus:ring-[#fd8152] focus:border-[#fd8152] bg-white text-black text-lg" placeholder="e.g., 50 or -20" step="0.01" />
                     </div>
                   </div>
                    <button
                     id="proceedToSareeSelectionButton"
                     onClick={handleProceedToSareeSelection}
                     disabled={!isCustomerInfoValid}
-                    className={`mt-6 w-full font-semibold py-2.5 px-4 rounded-lg shadow-md transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF9C5F] 
+                    className={`mt-6 w-full font-semibold py-2.5 px-4 rounded-lg shadow-md transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#fd8152] 
                       ${!isCustomerInfoValid
                         ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
-                        : 'bg-[#00CEC8] text-[#FFFBDE] hover:bg-[#FF9C5F] hover:text-[#014D6D] transform hover:scale-105'
+                        : 'bg-[#72a7e8] text-white hover:bg-[#fd8152] hover:text-white transform hover:scale-105'
                       }`}
                   >
                     Select Sarees
@@ -650,15 +654,15 @@ const App: React.FC = () => {
                 <div className="lg:col-span-2 space-y-8">
                    <button
                       onClick={handleBackToCustomerInfo}
-                      className="mb-4 px-4 py-2 bg-[#FFFBDE] text-[#014D6D] border border-[#00CEC8] rounded-lg hover:bg-[#FF9C5F] hover:text-[#014D6D] transition-colors duration-150 ease-in-out flex items-center text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF9C5F]"
+                      className="mb-4 px-4 py-2 bg-white/80 text-black border border-[#72a7e8] rounded-lg hover:bg-[#fd8152] hover:text-white transition-colors duration-150 ease-in-out flex items-center text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#fd8152]"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                       </svg>
                       Back to Customer & Invoice Details
                     </button>
-                  <section className="bg-[#FFFBDE] p-6 rounded-xl shadow-lg border border-[#00CEC8]">
-                    <h2 className="text-2xl font-semibold mb-4 text-[#014D6D] border-b border-[#00CEC8] pb-2">Select Sarees & Build Cart</h2>
+                  <section className="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-[#72a7e8]">
+                    <h2 className="text-2xl font-semibold mb-4 text-black border-b border-[#72a7e8] pb-2">Select Sarees & Build Cart</h2>
                     <div className="mb-6 flex flex-wrap gap-2">
                       {currentSareeCategories.map(category => (
                         <button
@@ -669,8 +673,8 @@ const App: React.FC = () => {
                           }}
                           className={`px-4 py-2 text-xl font-medium rounded-lg transition-colors duration-150 ease-in-out focus:outline-none 
                             ${selectedCategory === category 
-                              ? 'bg-[#00CEC8] text-[#FFFBDE] shadow-md ring-2 ring-offset-1 ring-[#FF9C5F] ring-offset-[#FFFBDE]'
-                              : 'bg-[#FFFBDE] text-[#014D6D] border border-[#00CEC8] hover:bg-[#FF9C5F] hover:text-[#014D6D] focus:ring-2 focus:ring-offset-2 focus:ring-[#FF9C5F]'
+                              ? 'bg-[#72a7e8] text-white shadow-md ring-2 ring-offset-1 ring-[#fd8152] ring-offset-white/80'
+                              : 'bg-white/80 text-black border border-[#72a7e8] hover:bg-[#fd8152] hover:text-white focus:ring-2 focus:ring-offset-2 focus:ring-[#fd8152]'
                             }`}
                         >
                           {category}
@@ -684,8 +688,8 @@ const App: React.FC = () => {
                 </div>
 
                 <div className="lg:col-span-1 space-y-6">
-                  <section className="bg-[#FFFBDE] p-6 rounded-xl shadow-lg border border-[#00CEC8] sticky top-8">
-                    <h2 className="text-2xl font-semibold mb-4 text-[#014D6D] border-b border-[#00CEC8] pb-2">Shopping Cart</h2>
+                  <section className="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-[#72a7e8] sticky top-8">
+                    <h2 className="text-2xl font-semibold mb-4 text-black border-b border-[#72a7e8] pb-2">Shopping Cart</h2>
                     <CartDisplay
                       cartItems={billItemsArray}
                       onUpdateQuantity={handleUpdateSareeQuantityInBill}
@@ -714,12 +718,12 @@ const App: React.FC = () => {
           </>
         ) : ( 
           <div className="space-y-6">
-            <section className="bg-[#FFFBDE] p-6 rounded-xl shadow-lg border border-[#00CEC8] max-w-4xl mx-auto">
-              <div className="flex justify-between items-center mb-6 border-b border-[#00CEC8] pb-3">
-                <h2 className="text-3xl font-semibold text-[#014D6D]">Final Bill</h2>
+            <section className="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-[#72a7e8] max-w-4xl mx-auto">
+              <div className="flex justify-between items-center mb-6 border-b border-[#72a7e8] pb-3">
+                <h2 className="text-3xl font-semibold text-black">Final Bill</h2>
                 <button
                   onClick={handleBackToEdit}
-                  className="px-4 py-2 bg-[#FFFBDE] text-[#014D6D] border border-[#00CEC8] rounded-lg hover:bg-[#FF9C5F] hover:text-[#014D6D] transition-colors duration-150 ease-in-out flex items-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF9C5F]"
+                  className="px-4 py-2 bg-white/80 text-black border border-[#72a7e8] rounded-lg hover:bg-[#fd8152] hover:text-white transition-colors duration-150 ease-in-out flex items-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#fd8152]"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -749,7 +753,7 @@ const App: React.FC = () => {
               {billItemsArray.length > 0 && (
                 <button
                   onClick={handleDownloadPdf}
-                  className="mt-8 w-full bg-[#00CEC8] text-[#FFFBDE] hover:bg-[#FF9C5F] hover:text-[#014D6D] font-semibold py-3 px-4 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF9C5F]"
+                  className="mt-8 w-full bg-[#72a7e8] text-white hover:bg-[#fd8152] hover:text-white font-semibold py-3 px-4 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#fd8152]"
                   aria-label="Download Bill as PDF"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
@@ -762,9 +766,9 @@ const App: React.FC = () => {
           </div>
         )}
       </div>
-       <footer className="text-center mt-12 py-6 border-t border-[#00CEC8]">
-        <p className="text-sm text-[#014D6D]">&copy; {new Date().getFullYear()} {COMPANY_DETAILS.name}. All rights reserved.</p>
-        <p className="text-xs text-[#014D6D] opacity-75 mt-1">Designed with Passion for Saree Craftsmanship</p>
+       <footer className="text-center mt-12 py-6 border-t border-[#72a7e8]/50">
+        <p className="text-sm text-black">&copy; {new Date().getFullYear()} {COMPANY_DETAILS.name}. All rights reserved.</p>
+        <p className="text-xs text-black opacity-75 mt-1">Designed with Passion for Saree Craftsmanship</p>
       </footer>
     </div>
   );
