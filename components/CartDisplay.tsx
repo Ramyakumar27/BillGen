@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BillItem } from '../types';
 import QuantityInput from './QuantityInput';
@@ -54,7 +53,7 @@ const CartDisplay: React.FC<CartDisplayProps> = ({
 
   if (cartItems.length === 0) {
     return (
-      <div className="text-center text-[#014D6D] py-10"> {/* Text color updated */}
+      <div className="text-center text-black py-10"> {/* Text color updated */}
         <p>Your cart is empty.</p>
         <p className="mt-2 text-sm">Add sarees to get started.</p>
       </div>
@@ -78,9 +77,9 @@ const CartDisplay: React.FC<CartDisplayProps> = ({
     <div className="space-y-4">
       <div className="max-h-[30rem] overflow-y-auto space-y-3 pr-2">
         {cartItems.map(item => (
-          <div key={item.id} className="bg-[#00CEC8] p-3 rounded-lg shadow flex flex-col gap-2"> {/* Card BG */}
+          <div key={item.id} className="bg-[#72a7e8] p-3 rounded-lg shadow flex flex-col gap-2"> {/* Card BG */}
             <div className="flex items-center justify-between gap-2">
-              <p className="text-xl font-medium text-[#014D6D] truncate flex-grow" title={item.name}>{item.name}</p> {/* Card Text updated */}
+              <p className="text-xl font-medium text-black truncate flex-grow" title={item.name}>{item.name}</p> {/* Card Text updated */}
               <button
                 onClick={() => onRemoveItem(item.id)}
                 className="text-red-500 hover:text-red-700 text-xs p-1 flex-shrink-0" /* Red icon color, Darker red on hover */
@@ -95,7 +94,7 @@ const CartDisplay: React.FC<CartDisplayProps> = ({
             
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1">
-                <label htmlFor={`price-${item.id}`} className="text-xs text-[#014D6D]">Price (₹):</label> {/* Card Text updated */}
+                <label htmlFor={`price-${item.id}`} className="text-xs text-black">Price (₹):</label> {/* Card Text updated */}
                 <input
                   type="number"
                   id={`price-${item.id}`}
@@ -108,7 +107,7 @@ const CartDisplay: React.FC<CartDisplayProps> = ({
                   }}
                   min="0"
                   step="0.01"
-                  className="w-20 p-1 border border-[#00CEC8] rounded-md text-sm focus:ring-1 focus:ring-[#FF9C5F] focus:border-[#FF9C5F] bg-white text-black" /* Border, Focus Ring, BG, Text */
+                  className="w-20 p-1 border border-[#72a7e8] rounded-md text-sm focus:ring-1 focus:ring-[#fd8152] focus:border-[#fd8152] bg-white text-black" /* Border, Focus Ring, BG, Text */
                   aria-label={`Price for ${item.name}`}
                   placeholder="0"
                 />
@@ -121,55 +120,55 @@ const CartDisplay: React.FC<CartDisplayProps> = ({
                 small={true}
               />
             </div>
-            <p className="text-xs font-semibold text-[#014D6D] text-right"> {/* Card Text updated */}
+            <p className="text-xs font-semibold text-black text-right"> {/* Card Text updated */}
               Total: ₹{item.totalPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
           </div>
         ))}
       </div>
 
-      <div className="border-t border-[#00CEC8] pt-4 space-y-1 text-xl"> {/* Border */}
+      <div className="border-t border-[#72a7e8] pt-4 space-y-1 text-xl"> {/* Border */}
         {discountPercentage > 0 && (
           <div className="flex justify-between font-medium">
-            <span className="text-[#014D6D]">Gross Total:</span> {/* Text color updated */}
-            <span className="text-[#014D6D]">₹{rawSubtotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> {/* Text color updated */}
+            <span className="text-black">Gross Total:</span> {/* Text color updated */}
+            <span className="text-black">₹{rawSubtotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> {/* Text color updated */}
           </div>
         )}
         {discountPercentage > 0 && (
           <div className="flex justify-between">
-            <span className="text-[#014D6D]">Discount ({formatRate(discountPercentage)}%):</span> {/* Text color updated */}
-            <span className="text-[#014D6D]">- ₹{discountAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> {/* Text color updated */}
+            <span className="text-black">Discount ({formatRate(discountPercentage)}%):</span> {/* Text color updated */}
+            <span className="text-black">- ₹{discountAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> {/* Text color updated */}
           </div>
         )}
         <div className="flex justify-between font-medium">
-          <span className="text-[#014D6D]">Taxable Value:</span> {/* Text color updated */}
-          <span className="text-[#014D6D]">₹{subtotalAfterDiscount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> {/* Text color updated */}
+          <span className="text-black">Taxable Value:</span> {/* Text color updated */}
+          <span className="text-black">₹{subtotalAfterDiscount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> {/* Text color updated */}
         </div>
         {cgstRate > 0 && (
           <div className="flex justify-between">
-            <span className="text-[#014D6D]">CGST ({formatRate(cgstRate)}%):</span> {/* Text color updated */}
-            <span className="text-[#014D6D]">₹{cgstAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> {/* Text color updated */}
+            <span className="text-black">CGST ({formatRate(cgstRate)}%):</span> {/* Text color updated */}
+            <span className="text-black">₹{cgstAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> {/* Text color updated */}
           </div>
         )}
         {sgstRate > 0 && (
           <div className="flex justify-between">
-            <span className="text-[#014D6D]">SGST ({formatRate(sgstRate)}%):</span> {/* Text color updated */}
-            <span className="text-[#014D6D]">₹{sgstAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> {/* Text color updated */}
+            <span className="text-black">SGST ({formatRate(sgstRate)}%):</span> {/* Text color updated */}
+            <span className="text-black">₹{sgstAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> {/* Text color updated */}
           </div>
         )}
         {igstRate > 0 && (
           <div className="flex justify-between">
-            <span className="text-[#014D6D]">IGST ({formatRate(igstRate)}%):</span> {/* Text color updated */}
-            <span className="text-[#014D6D]">₹{igstAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> {/* Text color updated */}
+            <span className="text-black">IGST ({formatRate(igstRate)}%):</span> {/* Text color updated */}
+            <span className="text-black">₹{igstAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> {/* Text color updated */}
           </div>
         )}
          {otherCharges !== 0 && (
           <div className="flex justify-between">
-            <span className="text-[#014D6D]">Other Charges:</span> {/* Text color updated */}
-            <span className="text-[#014D6D]">₹{otherCharges.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> {/* Text color updated */}
+            <span className="text-black">Other Charges:</span> {/* Text color updated */}
+            <span className="text-black">₹{otherCharges.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> {/* Text color updated */}
           </div>
         )}
-        <div className="flex justify-between text-md font-bold text-[#014D6D] border-t border-[#00CEC8] pt-2 mt-2"> {/* Text updated, Border */}
+        <div className="flex justify-between text-md font-bold text-black border-t border-[#72a7e8] pt-2 mt-2"> {/* Text updated, Border */}
           <span>Grand Total:</span>
           <span>₹{grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
         </div>
@@ -178,10 +177,10 @@ const CartDisplay: React.FC<CartDisplayProps> = ({
       <button
         onClick={onProceedToBill}
         disabled={isProceedDisabled}
-        className={`w-full mt-4 font-semibold py-2.5 px-4 rounded-lg shadow-md transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF9C5F] 
+        className={`w-full mt-4 font-semibold py-2.5 px-4 rounded-lg shadow-md transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#fd8152] 
           ${isProceedDisabled 
             ? 'bg-gray-500 text-gray-300 cursor-not-allowed' 
-            : 'bg-[#00CEC8] text-[#FFFBDE] hover:bg-[#FF9C5F] hover:text-[#014D6D] transform hover:scale-105' 
+            : 'bg-[#72a7e8] text-white hover:bg-[#fd8152] hover:text-white transform hover:scale-105' 
           }`}
         aria-label="Proceed to Generate Bill"
       >
