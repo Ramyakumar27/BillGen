@@ -32,7 +32,7 @@ const QuantityInput: React.FC<QuantityInputProps> = ({ value, onChange, min = 0,
         onChange={handleChange}
         min={min}
         max={max}
-        className={`${inputClass} p-1 border border-[#00CEC8] rounded-md focus:outline-none focus:ring-1 focus:ring-[#FF9C5F] focus:border-[#FF9C5F] bg-white text-black`} /* Border, Focus Ring, Text, BG */
+        className={`${inputClass} p-1 border border-[#72a7e8] rounded-md focus:outline-none focus:ring-1 focus:ring-[#fd8152] focus:border-[#fd8152] bg-white text-black`} /* Border, Focus Ring, Text, BG */
         aria-label="Current quantity"
         placeholder={min === 0 ? "0" : String(min)}
       />
