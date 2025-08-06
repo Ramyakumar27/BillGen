@@ -34,7 +34,6 @@ const App: React.FC = () => {
 
   const [categoryInteractionMade, setCategoryInteractionMade] = useState<boolean>(false);
 
-
   const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) {
@@ -132,14 +131,14 @@ const App: React.FC = () => {
         setCustomerList(parsedCustomers);
         setSelectedCategory(null);
         setCategoryInteractionMade(false);
-        setAppScreen('main');
+        setAppScreen('main'); // Switch screen automatically
         setCurrentView('selection');
         setSelectionStep('customerInfo');
         setFileError(null);
+        setAppMessage(null);
 
-        // FIX: Combine saree and customer messages cleanly.
         const successMessage = `Loaded ${parsedSarees.length} sarees. ${customerLoadMessage}`.trim();
-        setAppMessage({ type: 'success', message: successMessage });
+        console.log(successMessage); // Log success to console
 
       } catch (error: any) {
         console.error("Error processing Excel file:", error);
@@ -486,66 +485,65 @@ const App: React.FC = () => {
         <section className="bg-white/80 backdrop-blur-sm p-6 md:p-8 rounded-xl shadow-lg border border-[#72a7e8] w-full max-w-lg">
           <h2 className="text-2xl font-semibold mb-6 text-black border-b border-[#72a7e8] pb-3 text-center">Load Data from Excel</h2>
           <div className="space-y-4">
-            <div>
-              <label htmlFor="sareeFile" className="block text-xl font-medium text-black mb-2">
-                Upload Excel File <span className="text-sm">(.xlsx, .xls)</span>:
-              </label>
-              <input
-                type="file"
-                id="sareeFile"
-                accept=".xlsx, .xls, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                onChange={handleFileUpload}
-                className="block w-full text-lg text-black
-                           file:mr-4 file:py-2 file:px-4
-                           file:rounded-md file:border-0
-                           file:text-sm file:font-semibold
-                           file:bg-[#72a7e8] file:text-white
-                           hover:file:bg-[#fd8152] hover:file:text-white
-                           focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#fd8152] focus:ring-offset-white/80 cursor-pointer"
-                aria-describedby="file-instructions"
-              />
-              {fileName && <p className="text-sm text-black mt-2">Selected file: {fileName}</p>}
-            </div>
-             <div id="file-instructions" className="text-sm text-black p-3 bg-[#72a7e8]/20 border border-[#72a7e8] rounded-md space-y-3">
-              <div>
-                <p className="font-semibold">Sheet 1: "Sarees" (Required)</p>
-                <ul className="list-disc list-inside ml-2 space-y-0.5">
-                  <li>Sheet name must be exactly <strong>Sarees</strong>.</li>
-                  <li>Required columns: <strong>name</strong> (Text), <strong>price</strong> (Number), <strong>category</strong> (Text).</li>
-                </ul>
-              </div>
-              <div>
-                <p className="font-semibold">Sheet 2: "Customers" (Optional)</p>
-                <ul className="list-disc list-inside ml-2 space-y-0.5">
-                  <li>Sheet name must be exactly <strong>Customers</strong>.</li>
-                  <li>Required columns: <strong>gstin</strong>, <strong>name</strong>, <strong>address</strong>.</li>
-                  <li>If provided, typing a known GSTIN will autofill customer details.</li>
-                </ul>
-              </div>
-              <p className="text-xs pt-2 border-t border-[#72a7e8]/50">Column headers are case-insensitive. The first row in each sheet must be the header row.</p>
-            </div>
+              <>
+                <div>
+                  <label htmlFor="sareeFile" className="block text-xl font-medium text-black mb-2">
+                    Upload Excel File <span className="text-sm">(.xlsx, .xls)</span>:
+                  </label>
+                  <input
+                    type="file"
+                    id="sareeFile"
+                    accept=".xlsx, .xls, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    onChange={handleFileUpload}
+                    className="block w-full text-lg text-black
+                               file:mr-4 file:py-2 file:px-4
+                               file:rounded-md file:border-0
+                               file:text-sm file:font-semibold
+                               file:bg-[#72a7e8] file:text-white
+                               hover:file:bg-[#fd8152] hover:file:text-white
+                               focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#fd8152] focus:ring-offset-white/80 cursor-pointer"
+                    aria-describedby="file-instructions"
+                  />
+                  {fileName && !fileError && <p className="text-sm text-black mt-2">Selected file: {fileName}</p>}
+                </div>
+                 <div id="file-instructions" className="text-sm text-black p-3 bg-[#72a7e8]/20 border border-[#72a7e8] rounded-md space-y-3">
+                  <div>
+                    <p className="font-semibold">Sheet 1: "Sarees" (Required)</p>
+                    <ul className="list-disc list-inside ml-2 space-y-0.5">
+                      <li>Sheet name must be exactly <strong>Sarees</strong>.</li>
+                      <li>Required columns: <strong>name</strong> (Text), <strong>price</strong> (Number), <strong>category</strong> (Text).</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="font-semibold">Sheet 2: "Customers" (Optional)</p>
+                    <ul className="list-disc list-inside ml-2 space-y-0.5">
+                      <li>Sheet name must be exactly <strong>Customers</strong>.</li>
+                      <li>Required columns: <strong>gstin</strong>, <strong>name</strong>, <strong>address</strong>.</li>
+                      <li>If provided, typing a known GSTIN will autofill customer details.</li>
+                    </ul>
+                  </div>
+                  <p className="text-xs pt-2 border-t border-[#72a7e8]/50">Column headers are case-insensitive. The first row in each sheet must be the header row.</p>
+                </div>
 
-
-            {isLoadingData && (
-              <div className="flex items-center justify-center text-black mt-4 py-2">
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-[#72a7e8]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Processing file... Please wait.
-              </div>
-            )}
-            
-            {fileError && (
-              <p className="mt-4 text-center text-red-700 bg-red-100 p-3 rounded-md border border-red-300 shadow" role="alert">{fileError}</p>
-            )}
-            {appMessage && !fileError && (appMessage.type === 'success' || appMessage.type === 'info') && (
-               <div className={`mt-4 p-3 rounded-md text-sm text-center shadow 
-                 ${appMessage.type === 'success' ? 'bg-green-100 text-black border border-green-300' : 'bg-blue-100 text-black border border-blue-300'}`} 
-                 role="status">
-                 {appMessage.message}
-               </div>
-            )}
+                {isLoadingData && (
+                  <div className="flex items-center justify-center text-black mt-4 py-2">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-[#72a7e8]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Processing file... Please wait.
+                  </div>
+                )}
+                
+                {fileError && (
+                  <p className="mt-4 text-center text-red-700 bg-red-100 p-3 rounded-md border border-red-300 shadow" role="alert">{fileError}</p>
+                )}
+                {appMessage && !fileError && appMessage.type === 'info' && (
+                   <div className="mt-4 p-3 rounded-md text-sm text-center shadow bg-blue-100 text-black border border-blue-300" role="status">
+                     {appMessage.message}
+                   </div>
+                )}
+              </>
           </div>
         </section>
 
