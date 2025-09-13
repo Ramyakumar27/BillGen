@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Saree Bill Generator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif; /* A nice default sans-serif font */
+    }
+    .bg-gradient-custom {
+      background-image: linear-gradient( 111.6deg,  rgba(114,167,232,1) 9.4%, rgba(253,129,82,1) 43.9%, rgba(253,129,82,1) 54.8%, rgba(249,202,86,1) 86.3% );
+      background-attachment: fixed;
+    }
+    /* Additional style for printing the bill to ensure content is not cut off */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #bill-content, #bill-content * {
+        visibility: visible;
+      }
+      #bill-content {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+      }
+    }
+    /* Style for the date input's calendar icon */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      /* Targeting #72a7e8 */
+      filter: invert(72%) sepia(21%) saturate(3015%) hue-rotate(179deg) brightness(93%) contrast(89%);
+      cursor: pointer;
+    }
+    /* Firefox might need a different approach or might not support direct styling of the icon color easily.
+       This primarily targets WebKit browsers (Chrome, Safari, Edge).
+       For a more consistent icon, consider replacing the default date input with a custom component.
+    */
+  </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.2.0",
+    "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "react-dom/": "https://esm.sh/react-dom@18.2.0/",
+    "react/": "https://esm.sh/react@18.2.0/"
+  }
+}
+</script>
+</head>
+<body class="bg-gradient-custom">
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>

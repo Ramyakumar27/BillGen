@@ -1,0 +1,7 @@
+
+{
+  "name": "Saree Bill Generator (Excel Load)",
+  "description": "A web application for saree manufacturers to load inventory from an Excel file, then create and download customer bills in PDF format. Select saree types, specify quantities, and generate a professional bill.",
+  "requestFramePermissions": [],
+  "prompt": "Saree Bill Generator: Load your saree inventory from an Excel file. Select sarees, specify quantities, input customer details, and generate professional PDF bills with GST calculations. Ideal for saree manufacturers and retailers."
+}
